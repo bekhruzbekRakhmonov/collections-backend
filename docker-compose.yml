@@ -15,10 +15,11 @@ services:
 
   backend:
     container_name: backend
+    image: 20041128/collections:0.0.1
     env_file:
       - .env
     expose:
-      - '3000'
+      - '3000' 
     depends_on:
       - postgres
     networks:
