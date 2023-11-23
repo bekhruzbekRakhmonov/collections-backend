@@ -71,7 +71,6 @@ export class CustomFieldsController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Put('many')
     async updateMany(
-        @Param('id') id: string,
         @Body() updateManyCustomFieldsDto: CreateManyCustomFieldsDto,
         @Res() res: Response,
     ) {

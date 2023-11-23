@@ -99,6 +99,7 @@ export class AuthController {
             user.userId,
             user.role,
         );
+        console.log(accessToken)
         return { accessToken };
     }
 }

@@ -128,14 +128,11 @@ export class CollectionsService {
                     id: rawCollection.collection_ownerId,
                     email: rawCollection.owner_email,
                     name: rawCollection.owner_name,
-                    // Add other owner properties as needed
                 },
                 item_count: rawCollection.item_count,
-                // Add other properties as needed
             };
         });
 
-        // Concatenate the results
         const result = [...latestItems, ...topCollectionsFormatted];
 
         return {
@@ -199,10 +196,6 @@ export class CollectionsService {
             throw new NotFoundException('Collection not found');
         }
 
-        // await this.collectionRepo
-        // .createQueryBuilder("collection")
-        // .leftJoin("collection.owner", "owner", "owner.id = collection.ownerId")
-        // .leftJoin("")
         return collection;
     }
 

@@ -58,7 +58,12 @@ export class CustomFieldsService {
     }
 
     async findOne(id: number): Promise<CustomField> {
-        const customField = await this.customFieldRepo.findOneBy({ id });
+        const customField = await this.customFieldRepo.findOne({
+            where: { id },
+            relations: {
+                owner: true,
+            },
+        });
         if (!customField) {
             throw new NotFoundException('Custom field not found');
         }

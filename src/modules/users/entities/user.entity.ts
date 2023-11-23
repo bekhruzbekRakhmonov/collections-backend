@@ -1,5 +1,7 @@
 import { Collection } from 'src/modules/collections/entities/collection.entity';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
+import { CustomField } from 'src/modules/custom_fields/entities/custom_field.entity';
+import { Item } from 'src/modules/items/entities/item.entity';
 import { Like } from 'src/modules/likes/entities/like.entity';
 import {
     Column,
@@ -36,6 +38,12 @@ export class User {
 
     @OneToMany(() => Collection, (collection: Collection) => collection.owner)
     collections: Collection[];
+
+    @OneToMany(() => Item, (item: Item) => item.owner)
+    items: Item[];
+
+    @OneToMany(() => CustomField, (custom_field: CustomField) => custom_field.owner)
+    custom_fields: CustomField[];
 
     @OneToMany(() => Comment, (comment: Comment) => comment.owner)
     comments: Comment[];

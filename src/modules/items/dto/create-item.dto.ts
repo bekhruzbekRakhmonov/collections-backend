@@ -30,8 +30,8 @@ export class CreateItemDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    @Type(() => Array)
-    @IsArray()
+    @Type(() => String)
+    @IsString()
     tags: string;
 }
 

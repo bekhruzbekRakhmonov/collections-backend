@@ -10,7 +10,7 @@ export class Like {
     @ManyToOne(() => User, (user: User) => user.likes)
     owner: User;
 
-    @ManyToOne(() => Item, (item: Item) => item.likes)
+    @ManyToOne(() => Item, (item: Item) => item.likes, {onDelete: 'CASCADE', cascade: true})
     item: Item;
 
     @CreateDateColumn()

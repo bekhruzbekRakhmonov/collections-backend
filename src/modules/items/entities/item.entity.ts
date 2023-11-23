@@ -10,6 +10,7 @@ import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { Like } from 'src/modules/likes/entities/like.entity';
 import { Collection } from 'src/modules/collections/entities/collection.entity';
 import { CustomField } from 'src/modules/custom_fields/entities/custom_field.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @Entity('items')
 export class Item {
@@ -23,6 +24,12 @@ export class Item {
     @Index({ fulltext: true })
     @Column({ type: 'varchar', length: 255, nullable: true })
     tags: string;
+
+    @ManyToOne(() => User, (user: User) => user.items, {
+        onDelete: 'CASCADE',
+        cascade: true,
+    })
+    owner: User;
 
     @OneToMany(() => Comment, (comment: Comment) => comment.item)
     comments: Comment[];

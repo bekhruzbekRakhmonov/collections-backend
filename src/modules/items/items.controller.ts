@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards, Query, Put, Req, ForbiddenException } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { CreateItemDto, CreateManyItemsDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -8,6 +8,8 @@ import { APIResponse } from 'src/common/http/response/response.api';
 import JwtAuthGuard from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles/roles.guard';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
+import RequestWithUser from '../auth/interfaces/request-with-user.interface';
+import { Role } from '../auth/roles/role.enum';
 
 @ApiTags('items')
 @Controller('items')
@@ -44,7 +46,10 @@ export class ItemsController {
     }
 
     @Get(':id/collections')
-    async findItemsByCollectionId(@Param('id') id: string, @Res() res: Response) {
+    async findItemsByCollectionId(
+        @Param('id') id: string,
+        @Res() res: Response,
+    ) {
         const items = await this.itemsService.findItemsByCollectionId(+id);
         return APIResponse(res).statusOK(items);
     }
@@ -61,7 +66,12 @@ export class ItemsController {
         @Param('id') id: string,
         @Body() updateItemDto: UpdateItemDto,
         @Res() res: Response,
+        @Req() req: RequestWithUser,
     ) {
+        const item = await this.itemsService.findOne(+id);
+        if (item.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+            throw new ForbiddenException("Can't modify this item");
+        }
         const updatedItem = await this.itemsService.update(+id, updateItemDto);
         return APIResponse(res).statusOK(updatedItem);
     }
@@ -80,7 +90,15 @@ export class ItemsController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(':id')
-    async remove(@Param('id') id: string, @Res() res: Response) {
+    async remove(
+        @Param('id') id: string,
+        @Res() res: Response,
+        @Req() req: RequestWithUser,
+    ) {
+        const item = await this.itemsService.findOne(+id);
+        if (item.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+            throw new ForbiddenException("Can't modify this item");
+        }
         const removedItem = await this.itemsService.remove(+id);
         return APIResponse(res).statusNoContent();
     }

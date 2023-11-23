@@ -9,8 +9,8 @@ import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import { config } from 'dotenv';
 import * as express from 'express';
-import { WsAdapter } from '@nestjs/platform-ws';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as fs from "node:fs";
 config();
 
 async function bootstrap() {
@@ -21,6 +21,15 @@ async function bootstrap() {
             credentials: false,
         },
     });
+
+    const folderPath = "uploads"
+
+    if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath);
+        console.log(`Folder '${folderPath}' created.`);
+    } else {
+        console.log(`Folder '${folderPath}' already exists.`);
+    }
 
     app.useWebSocketAdapter(new IoAdapter(app));
 

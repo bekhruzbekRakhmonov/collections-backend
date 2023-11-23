@@ -32,7 +32,10 @@ export class Collection {
     @Column({ type: 'varchar', length: 255, nullable: true })
     photo: string;
 
-    @ManyToOne(() => User, (user: User) => user.collections)
+    @ManyToOne(() => User, (user: User) => user.collections, {
+        onDelete: 'CASCADE',
+        cascade: true,
+    })
     owner: User;
 
     @OneToMany(() => Item, (item: Item) => item.collection)

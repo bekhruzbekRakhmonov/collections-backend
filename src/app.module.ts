@@ -13,10 +13,13 @@ import { CustomFieldsModule } from './modules/custom_fields/custom_fields.module
 import * as Joi from '@hapi/joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Item } from './modules/items/entities/item.entity';
+import { User } from './modules/users/entities/user.entity';
+import { Collection } from './modules/collections/entities/collection.entity';
+import { Comment } from './modules/comments/entities/comment.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Item]),
+        TypeOrmModule.forFeature([Item, User, Collection, Comment]),
         UsersModule,
         CommentsModule,
         CollectionsModule,
