@@ -9,6 +9,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
 import { Comment } from '../comments/entities/comment.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ItemsService {
@@ -19,16 +20,16 @@ export class ItemsService {
         private readonly collectionRepo: Repository<Collection>,
     ) {}
 
-    async create(dto: CreateItemDto): Promise<Item> {
+    async create(dto: CreateItemDto, owner: User): Promise<Item> {
         const { collection_id, name, tags } = dto;
         const collection = await this.collectionRepo.findOneBy({
             id: collection_id,
         });
-        const item = this.itemRepo.create({ collection, name, tags });
+        const item = this.itemRepo.create({ collection, name, tags, owner });
         return this.itemRepo.save(item);
     }
 
-    async createMany(dto: CreateManyItemsDto): Promise<Item[]> {
+    async createMany(dto: CreateManyItemsDto, owner: User): Promise<Item[]> {
         const { collection_id, items } = dto;
         const collection = await this.collectionRepo.findOneBy({
             id: collection_id,
@@ -39,6 +40,7 @@ export class ItemsService {
                     collection,
                     name,
                     tags,
+                    owner
                 });
                 return await this.itemRepo.save(newItem);
             }),
@@ -57,7 +59,6 @@ export class ItemsService {
                 },
             },
         });
-        console.log(item);
         return item.comments;
     }
 

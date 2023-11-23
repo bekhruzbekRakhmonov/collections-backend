@@ -10,6 +10,8 @@ import {
     Delete,
     Patch,
     UseGuards,
+    Req,
+    ForbiddenException,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { Comment } from './entities/comment.entity';
@@ -22,6 +24,7 @@ import JwtAuthGuard from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles/roles.guard';
 import RequestWithUser from '../auth/interfaces/request-with-user.interface';
 import { ApiTags } from '@nestjs/swagger';
+import { Role } from '../auth/roles/role.enum';
 
 @ApiTags('comments')
 @Controller('comments')
@@ -55,15 +58,28 @@ export class CommentsController {
     @Patch(':id')
     async update(
         @Param('id') id: number,
-        @Res() res: Response,
         @Body() dto: UpdateCommentDto,
+        @Res() res: Response,
+        @Req() req: RequestWithUser,
     ) {
+        const comment = await this.commentsService.findOne(+id);
+        if (comment.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+            throw new ForbiddenException("Can't modify this comment");
+        }
         const updatedComment = await this.commentsService.update(id, dto);
         return APIResponse(res).statusOK(updatedComment);
     }
 
     @Delete(':id')
-    async delete(@Param('id') id: number, @Res() res: Response) {
+    async delete(
+        @Param('id') id: number,
+        @Res() res: Response,
+        @Req() req: RequestWithUser,
+    ) {
+        const comment = await this.commentsService.findOne(+id);
+        if (comment.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+            throw new ForbiddenException("Can't modify this comment");
+        }
         await this.commentsService.remove(id);
         return APIResponse(res).statusNoContent();
     }

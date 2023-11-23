@@ -78,7 +78,7 @@ export class UsersService {
         return await this.userRepository.save(user);
     }
 
-    async remove(id: number, req: RequestWithUser): Promise<User> {
+    async remove(id: number): Promise<User> {
         const user = await this.userRepository.findOne({
             where: {
                 id,

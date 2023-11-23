@@ -23,11 +23,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     async validate(req: Request, payload: TokenPayload): Promise<any> {
         const user = await this.userService.findOne(payload.userId);
-        const { password, ...rest } = user;
         if (!user) {
             throw new UnauthorizedException();
         }
-        return { ...rest };
+        return user;
     }
     async authenticate(request: any, options?: any): Promise<any> {
         return super.authenticate(request, options);

@@ -75,10 +75,7 @@ export class CommentsService {
             return undefined;
         }
 
-        // Update the comment properties based on updateCommentDto, if necessary
         comment.content = updateCommentDto.content;
-
-        // You might need to update other properties here based on your requirements, like item and owner associations.
 
         return await this.commentRepo.save(comment);
     }

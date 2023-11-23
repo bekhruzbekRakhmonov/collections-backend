@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Req, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Req, UseGuards, Put, ForbiddenException, Query } from '@nestjs/common';
 import { CustomFieldsService } from './custom_fields.service';
 import { CreateCustomFieldDto, CreateManyCustomFieldsDto } from './dto/create-custom_field.dto';
 import { UpdateCustomFieldDto } from './dto/update-custom_field.dto';
@@ -8,6 +8,8 @@ import { Response } from 'express';
 import RequestWithUser from '../auth/interfaces/request-with-user.interface';
 import JwtAuthGuard from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles/roles.guard';
+import { Role } from '../auth/roles/role.enum';
+import { PaginationDto } from 'src/common/pagination/pagination.dto';
 
 @ApiTags('custom-fields')
 @Controller('custom-fields')
@@ -36,14 +38,15 @@ export class CustomFieldsController {
     ) {
         const newCustomFields = await this.customFieldsService.createMany(
             createManyCustomFieldsDto,
+            req.user.id,
         );
         return APIResponse(res).statusCreated(newCustomFields);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    async findAll(@Res() res: Response) {
-        const customFields = await this.customFieldsService.findAll();
+    async findAll(@Res() res: Response, @Query() query: PaginationDto) {
+        const customFields = await this.customFieldsService.findAll(query);
         return APIResponse(res).statusOK(customFields);
     }
 
@@ -60,7 +63,15 @@ export class CustomFieldsController {
         @Param('id') id: string,
         @Body() updateCustomFieldDto: UpdateCustomFieldDto,
         @Res() res: Response,
+        @Req() req: RequestWithUser,
     ) {
+        const customField = await this.customFieldsService.findOne(+id);
+        if (
+            customField.owner.id !== req.user.id &&
+            req.user.role !== Role.Admin
+        ) {
+            throw new ForbiddenException("Can't modify this custom field");
+        }
         const updatedCustomField = await this.customFieldsService.update(
             +id,
             updateCustomFieldDto,
@@ -73,7 +84,27 @@ export class CustomFieldsController {
     async updateMany(
         @Body() updateManyCustomFieldsDto: CreateManyCustomFieldsDto,
         @Res() res: Response,
+        @Req() req: RequestWithUser,
     ) {
+        const { customFields } = updateManyCustomFieldsDto;
+
+        for (const itemFields of customFields) {
+            for (const field of itemFields) {
+                const customField = await this.customFieldsService.findOne(
+                    field.id,
+                );
+
+                if (
+                    customField.owner.id !== req.user.id &&
+                    req.user.role !== Role.Admin
+                ) {
+                    throw new ForbiddenException(
+                        "Can't modify this custom field",
+                    );
+                }
+            }
+        }
+
         const updatedCustomFields = await this.customFieldsService.updateMany(
             updateManyCustomFieldsDto,
         );
@@ -82,8 +113,19 @@ export class CustomFieldsController {
 
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
-    async remove(@Param('id') id: string, @Res() res: Response) {
-        const removedCustomField = await this.customFieldsService.remove(+id);
+    async remove(
+        @Param('id') id: string,
+        @Res() res: Response,
+        @Req() req: RequestWithUser,
+    ) {
+        const customField = await this.customFieldsService.findOne(+id);
+        if (
+            customField.owner.id !== req.user.id &&
+            req.user.role !== Role.Admin
+        ) {
+            throw new ForbiddenException("Can't modify this custom field");
+        }
+        await this.customFieldsService.remove(+id);
         return APIResponse(res).statusNoContent();
     }
 }

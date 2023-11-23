@@ -72,7 +72,7 @@ export class AppService {
         const collectionResults = await this.collectionRepo
             .createQueryBuilder()
             .where(
-                `to_tsvector('simple', name || ' ' || description) @@ to_tsquery('simple', :query)`,
+                `to_tsvector('simple', name || ' ' || description || ' ' || topic) @@ to_tsquery('simple', :query)`,
                 { query: `${formattedQuery}:*` },
             )
             .skip((page - 1) * limit)

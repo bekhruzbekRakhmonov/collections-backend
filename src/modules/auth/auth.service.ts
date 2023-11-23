@@ -1,4 +1,5 @@
 import {
+    BadGatewayException,
     HttpException,
     HttpStatus,
     Injectable,
@@ -28,6 +29,9 @@ export class AuthService {
         const user = await this.userService.findByUsername(username);
         if (!user) {
             throw new NotFoundException('User not found');
+        }
+        if (user.status === "blocked") {
+            throw new BadGatewayException('Account blocked');
         }
         await this.verifyPassword(plainTextPassword, user.password);
         const { password, ...result } = user;

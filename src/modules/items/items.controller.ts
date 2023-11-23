@@ -18,8 +18,8 @@ export class ItemsController {
 
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Post()
-    async create(@Body() createItemDto: CreateItemDto, @Res() res: Response) {
-        const newItem = await this.itemsService.create(createItemDto);
+    async create(@Body() createItemDto: CreateItemDto, @Res() res: Response, @Req() req: RequestWithUser) {
+        const newItem = await this.itemsService.create(createItemDto, req.user);
         return APIResponse(res).statusCreated(newItem);
     }
 
@@ -28,8 +28,9 @@ export class ItemsController {
     async createMany(
         @Body() createManyItemsDto: CreateManyItemsDto,
         @Res() res: Response,
+        @Req() req: RequestWithUser,
     ) {
-        const newItems = await this.itemsService.createMany(createManyItemsDto);
+        const newItems = await this.itemsService.createMany(createManyItemsDto, req.user);
         return APIResponse(res).statusCreated(newItems);
     }
 
@@ -81,7 +82,17 @@ export class ItemsController {
     async updateMany(
         @Body() updateManyItemsDto: CreateManyItemsDto,
         @Res() res: Response,
+        @Req() req: RequestWithUser,
     ) {
+        const { items } = updateManyItemsDto;
+        
+        items.map(async (itemData) => {
+            const item = await this.itemsService.findOne(itemData.id);
+            if (item.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+                throw new ForbiddenException("Can't modify this item");
+            }
+        })
+
         const updatedItems = await this.itemsService.updateMany(
             updateManyItemsDto,
         );
@@ -99,7 +110,7 @@ export class ItemsController {
         if (item.owner.id !== req.user.id && req.user.role !== Role.Admin) {
             throw new ForbiddenException("Can't modify this item");
         }
-        const removedItem = await this.itemsService.remove(+id);
+        await this.itemsService.remove(+id);
         return APIResponse(res).statusNoContent();
     }
 }

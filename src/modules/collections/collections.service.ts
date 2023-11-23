@@ -167,30 +167,6 @@ export class CollectionsService {
         return collection;
     }
 
-    async updateItems(items: Partial<Item>[], itemCustomFields: CreateCustomFieldDto[]) {
-        items.map(async ({id, name, tags}) => {
-            const item = await this.itemRepo.findOne({
-                where: {
-                    id
-                }
-            })
-
-            if (item) {
-                item.name = name;
-                item.tags = tags;
-                // item.custom_fields.map();
-                itemCustomFields.map((customField, index) => {
-                    if (customField) {}
-                })
-                if (item.custom_fields.length < itemCustomFields.length) {
-                    
-                } else if (item.custom_fields.length > itemCustomFields.length) {
-
-                }
-            }
-        })
-    }
-
     async update(
         id: number,
         updateCollectionDto: UpdateCollectionDto,
