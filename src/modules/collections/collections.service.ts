@@ -92,48 +92,17 @@ export class CollectionsService {
 
 
     async findAll(query?: PaginationDto): Promise<PaginationResponse> {
-        // Fetch the latest items
-        const latestItems = await this.collectionRepo.find({
-            relations: {
-                owner: true,
-            },
-            order: {
-                created_at: 'desc', // Assuming you have a createdAt column in your entity
-            },
-            skip: (query?.limit || 5) * ((query?.page || 1) - 1),
-            take: query?.limit || 5,
-        });
-
-        // Fetch the top 5 largest collections based on the number of items
-        const topCollections = await this.collectionRepo
+        const result = await this.collectionRepo
             .createQueryBuilder('collection')
             .leftJoinAndSelect('collection.owner', 'owner')
             .leftJoin('collection.items', 'items')
             .addSelect('COUNT(items.id) as item_count')
-            .groupBy('collection.id, owner.id') // Group by both collection and owner to avoid SQL errors
+            .groupBy('collection.id, owner.id')
             .orderBy('item_count', 'DESC')
+            .addOrderBy('collection.created_at', 'DESC')
             .offset((query?.limit || 10) * ((query?.page || 1) - 1))
-            .limit(5)
-            .getRawMany();
-
-        // Map topCollections to a structure similar to latestItems
-        const topCollectionsFormatted = topCollections.map((rawCollection) => {
-            return {
-                id: rawCollection.collection_id,
-                name: rawCollection.collection_name,
-                description: rawCollection.collection_description,
-                created_at: rawCollection.collection_created_at,
-                updated_at: rawCollection.collection_updated_at,
-                owner: {
-                    id: rawCollection.collection_ownerId,
-                    email: rawCollection.owner_email,
-                    name: rawCollection.owner_name,
-                },
-                item_count: rawCollection.item_count,
-            };
-        });
-
-        const result = [...latestItems, ...topCollectionsFormatted];
+            .limit(query?.limit || 10)
+            .getMany();
 
         return {
             result,
