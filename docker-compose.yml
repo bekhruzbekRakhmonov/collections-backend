@@ -1,6 +1,19 @@
-version: '3'
+version: '3.8'
 
 services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - docker.env
+    networks:
+      - backend
+    restart: unless-stopped
+
   backend:
     container_name: backend
     image: 20041128/collections:0.0.1
@@ -8,8 +21,11 @@ services:
       - .env
     expose:
       - '3000' 
-    networks:
+    depends_on:
       - postgres
+    networks:
+      - backend
+    restart: unless-stopped
 
   caddy:
     container_name: caddy
@@ -23,11 +39,15 @@ services:
       - '443:443'
     depends_on:
       - backend
+    networks:
+      - backend
+    restart: unless-stopped
 
 networks:
-  postgres:
-    external: true
+  backend:
+    driver: bridge
 
 volumes:
+  postgres_data:
   caddy_data:
   caddy_config:
