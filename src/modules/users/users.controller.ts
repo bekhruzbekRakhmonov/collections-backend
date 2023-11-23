@@ -79,7 +79,7 @@ export class UsersController {
         @Res() res: Response,
         @Req() req: RequestWithUser,
     ) {
-        const updatedUser = await this.usersService.update(req.user.id, updateUserDto);
+        const updatedUser = await this.usersService.updateAccount(req.user.id, updateUserDto);
         return APIResponse(res).statusOK(updatedUser);
     }
 

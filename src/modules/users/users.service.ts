@@ -65,16 +65,22 @@ export class UsersService {
         return await this.userRepository.findOne({ where: { email } });
     }
 
-    async update(
-        id: number,
-        updateUserDto: UpdateUserDto,
-    ): Promise<User> {
-        const {name, email, status, role} = updateUserDto;
+    async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+        const { name, email, status, role } = updateUserDto;
         const user = await this.userRepository.findOne({ where: { id } });
         user.name = name;
         user.email = email;
         user.status = status;
         user.role = role;
+        return await this.userRepository.save(user);
+    }
+
+    async updateAccount(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+        const { name, email, status, role } = updateUserDto;
+        const user = await this.userRepository.findOne({ where: { id } });
+        user.name = name;
+        user.email = email;
+        user.status = status;
         return await this.userRepository.save(user);
     }
 
