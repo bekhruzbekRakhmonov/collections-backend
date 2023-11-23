@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
@@ -15,7 +14,7 @@ import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import * as fs from 'node:fs';
 import { User } from '../users/entities/user.entity';
 import { CreateCustomFieldDto } from '../custom_fields/dto/create-custom_field.dto';
-import { isBase64 } from 'class-validator';
+import { isBase64Image } from 'src/common/utils/base64ImageChecker';
 
 @Injectable()
 export class CollectionsService {
@@ -44,7 +43,7 @@ export class CollectionsService {
         }));
 
         let photoPath = null;
-        if (photo) {
+        if (photo && isBase64Image(photo)) {
             const base64Content = photo.split(',')[1];
             const photoBuffer = Buffer.from(base64Content, 'base64');
 
@@ -216,7 +215,7 @@ export class CollectionsService {
         }))
 
         let photoPath = null;
-        if (photo && isBase64(photoPath)) {
+        if (photo && isBase64Image(photo)) {
             const base64Content = photo.split(',')[1];
             const photoBuffer = Buffer.from(base64Content, 'base64');
 
@@ -228,7 +227,7 @@ export class CollectionsService {
         }
         collection.name = name;
         collection.description = description;
-        collection.photo = photo;
+        collection.photo = photoPath;
         collection.topic = topic;
         return await this.collectionRepo.save(collection)
     }

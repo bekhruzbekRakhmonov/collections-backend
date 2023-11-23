@@ -61,7 +61,6 @@ export class CommentsGateway {
     ) {
         const roomName = `item-${itemId}`;
 
-        // Join the room associated with the item
         client.join(roomName);
 
         this.logger.log(`Client id: ${client.id} joined room: ${roomName}`);
@@ -74,7 +73,6 @@ export class CommentsGateway {
     ) {
         const roomName = `item-${itemId}`;
 
-        // Leave the room associated with the item
         client.leave(roomName);
 
         this.logger.log(`Client id: ${client.id} left room: ${roomName}`);
@@ -85,15 +83,19 @@ export class CommentsGateway {
         @MessageBody() createCommentDto: CreateCommentDto,
         @ConnectedSocket() client: Socket,
     ) {
-        const {item_id} = createCommentDto;
+        const { item_id } = createCommentDto;
+        const roomName = `item-${item_id}`;
+
+        if (!this.user) {
+            this.io.to(roomName).emit('error', 'User not found');
+            return;
+        }
         const newComment = await this.commentsService.create(
             createCommentDto,
             this.user,
         );
 
-        const roomName = `item-${item_id}`;
 
-        // Emit the 'newComment' event to clients in the room associated with the item
         this.io.to(roomName).emit('newComment', newComment);
     }
 
