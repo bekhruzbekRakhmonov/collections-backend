@@ -44,12 +44,9 @@ export class CommentsService {
             .addSelect('comment.content', 'content')
             .addSelect('comment.created_at', 'created_at')
             .addSelect('comment.updated_at', 'updated_at')
-            .orderBy(
-                `comment.${query?.orderBy || 'id'}`,
-                (query?.order?.toUpperCase() as any) || 'ASC',
-            )
-            .skip((query?.limit || 10) * ((query?.page || 1) - 1))
-            .take(query?.limit || 10)
+            .orderBy('comment.created_at', 'DESC')
+            .offset((query?.limit || 10) * ((query?.page || 1) - 1))
+            .limit(query?.limit || 10)
             .getRawMany();
 
 

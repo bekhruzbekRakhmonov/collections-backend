@@ -33,15 +33,17 @@ export class CommentsGateway {
 
     async handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) {
         try {
-            if (typeof client.handshake.headers.cookie !== 'string') {
-                client.emit('unauthenticated', {
-                    message: 'Cookie header is not a string.',
-                });
-                return;
-            }
+            console.log(client.handshake)
+            // if (typeof client.handshake.headers.cookie !== 'string') {
+            //     client.emit('unauthenticated', {
+            //         message: 'Cookie header is not a string.',
+            //     });
+            //     return;
+            // }
 
-            const parsedCookies = cookie.parse(client.handshake.headers.cookie);
-            const accessToken = parsedCookies.accessToken;
+            // const parsedCookies = cookie.parse(client.handshake.headers.cookie);
+            // const accessToken = parsedCookies.accessToken;
+            const accessToken = client.handshake.auth.token;
             const user = await this.authService.getUserFromAuthenticationToken(
                 accessToken,
             );

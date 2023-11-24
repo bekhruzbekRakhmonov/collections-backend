@@ -58,6 +58,11 @@ export class ItemsService {
                     owner: true,
                 },
             },
+            order: {
+                comments: {
+                    created_at: 'DESC',
+                }
+            }
         });
         return item.comments;
     }
