@@ -18,7 +18,7 @@ services:
     container_name: backend
     image: 20041128/collections:0.0.2
     volumes:
-      - ~/collections-backend:/uploads
+      - ~/collections-backend/uploads:/uploads
     env_file:
       - .env
     expose:

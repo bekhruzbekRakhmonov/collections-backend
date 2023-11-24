@@ -53,6 +53,7 @@ export class CommentsGateway {
             client.emit('unauthenticated', {
                 message: 'Unauthenticated user.',
             });
+            console.error(error)
             this.logger.error(error.message);
         }
     }
