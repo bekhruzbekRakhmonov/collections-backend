@@ -38,7 +38,7 @@ export class CustomFieldsController {
     ) {
         const newCustomFields = await this.customFieldsService.createMany(
             createManyCustomFieldsDto,
-            req.user.id,
+            req.user,
         );
         return APIResponse(res).statusCreated(newCustomFields);
     }
@@ -67,8 +67,7 @@ export class CustomFieldsController {
     ) {
         const customField = await this.customFieldsService.findOne(+id);
         if (
-            customField.owner.id !== req.user.id &&
-            req.user.role !== Role.Admin
+            customField.owner.id !== req.user.id
         ) {
             throw new ForbiddenException("Can't modify this custom field");
         }
@@ -88,25 +87,24 @@ export class CustomFieldsController {
     ) {
         const { customFields } = updateManyCustomFieldsDto;
 
-        for (const itemFields of customFields) {
-            for (const field of itemFields) {
-                const customField = await this.customFieldsService.findOne(
-                    field.id,
-                );
-
-                if (
-                    customField.owner.id !== req.user.id &&
-                    req.user.role !== Role.Admin
-                ) {
-                    throw new ForbiddenException(
-                        "Can't modify this custom field",
-                    );
-                }
-            }
-        }
+        // for (const itemFields of customFields) {
+        //     for (const field of itemFields) {
+        //         if (field.id !== undefined) {
+        //             const customField = await this.customFieldsService.findOne(
+        //                 field.id,
+        //             );
+        //             if (customField.owner.id !== req.user.id) {
+        //                 throw new ForbiddenException(
+        //                     "Can't modify this custom field",
+        //                 );
+        //             }
+        //         }
+        //     }
+        // }
 
         const updatedCustomFields = await this.customFieldsService.updateMany(
             updateManyCustomFieldsDto,
+            req.user
         );
         return APIResponse(res).statusOK(updatedCustomFields);
     }
@@ -120,8 +118,7 @@ export class CustomFieldsController {
     ) {
         const customField = await this.customFieldsService.findOne(+id);
         if (
-            customField.owner.id !== req.user.id &&
-            req.user.role !== Role.Admin
+            customField.owner.id !== req.user.id
         ) {
             throw new ForbiddenException("Can't modify this custom field");
         }

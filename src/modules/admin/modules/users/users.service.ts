@@ -1,16 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
-import RequestWithUser from '../auth/interfaces/request-with-user.interface';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
+import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
+import { UpdateUserDto } from 'src/modules/users/dto/update-user.dto';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @Injectable()
-export class UsersService {
+export class AdminUsersService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
@@ -37,7 +36,7 @@ export class UsersService {
         return hashedPassword;
     }
 
-    async findAll(query?: PaginationDto): Promise<PaginationResponse> {
+    async findAll(query: PaginationDto): Promise<PaginationResponse> {
         const total = await this.userRepository.count();
         const result = await this.userRepository.find({
             order: {
@@ -55,7 +54,7 @@ export class UsersService {
         };
     }
 
-    async findOne(id: number): Promise<User> {
+    async findOne(id: number, detail = false): Promise<User> {
         return await this.userRepository.findOne({
             where: { id: id },
         });
@@ -72,15 +71,6 @@ export class UsersService {
         user.email = email;
         user.status = status;
         user.role = role;
-        return await this.userRepository.save(user);
-    }
-
-    async updateAccount(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-        const { name, email, status, role } = updateUserDto;
-        const user = await this.userRepository.findOne({ where: { id } });
-        user.name = name;
-        user.email = email;
-        user.status = status;
         return await this.userRepository.save(user);
     }
 

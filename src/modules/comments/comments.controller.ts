@@ -63,7 +63,7 @@ export class CommentsController {
         @Req() req: RequestWithUser,
     ) {
         const comment = await this.commentsService.findOne(+id);
-        if (comment.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+        if (comment.owner.id !== req.user.id) {
             throw new ForbiddenException("Can't modify this comment");
         }
         const updatedComment = await this.commentsService.update(id, dto);
@@ -77,7 +77,7 @@ export class CommentsController {
         @Req() req: RequestWithUser,
     ) {
         const comment = await this.commentsService.findOne(+id);
-        if (comment.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+        if (comment.owner.id !== req.user.id) {
             throw new ForbiddenException("Can't modify this comment");
         }
         await this.commentsService.remove(id);

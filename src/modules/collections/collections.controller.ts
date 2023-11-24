@@ -44,12 +44,6 @@ export class CollectionsController {
         return APIResponse(res).statusOK(newCollection);
     }
 
-    @Get('admin')
-    async findAllForAdmin(@Res() res: Response, @Query() dto: PaginationDto) {
-        const collections = await this.collectionsService.findAllForAdmin(dto);
-        return APIResponse(res).statusOK(collections);
-    }
-
     @Get()
     async findAll(@Res() res: Response, @Query() dto: PaginationDto) {
         const collections = await this.collectionsService.findAll(dto);
@@ -84,8 +78,7 @@ export class CollectionsController {
     ) {
         const collection = await this.collectionsService.findOne(+id);
         if (
-            collection.owner.id !== req.user.id &&
-            req.user.role !== Role.Admin
+            collection.owner.id !== req.user.id
         ) {
             throw new ForbiddenException("Can't modify this collection");
         }
@@ -105,8 +98,7 @@ export class CollectionsController {
     ) {
         const collection = await this.collectionsService.findOne(+id);
         if (
-            collection.owner.id !== req.user.id &&
-            req.user.role !== Role.Admin
+            collection.owner.id !== req.user.id
         ) {
             throw new ForbiddenException("Can't delete this collection");
         }

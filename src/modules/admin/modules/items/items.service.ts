@@ -1,18 +1,16 @@
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Item } from './entities/item.entity';
-import { CreateItemDto, CreateManyItemsDto } from './dto/create-item.dto';
-import { Collection } from '../collections/entities/collection.entity';
-import { UpdateItemDto } from './dto/update-item.dto';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
-import { Comment } from '../comments/entities/comment.entity';
-import { User } from '../users/entities/user.entity';
+import { Collection } from 'src/modules/collections/entities/collection.entity';
+import { CreateItemDto, CreateManyItemsDto } from 'src/modules/items/dto/create-item.dto';
+import { UpdateItemDto } from 'src/modules/items/dto/update-item.dto';
+import { Item } from 'src/modules/items/entities/item.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @Injectable()
-export class ItemsService {
+export class AdminItemsService {
     constructor(
         @InjectRepository(Item)
         private readonly itemRepo: Repository<Item>,
@@ -20,7 +18,7 @@ export class ItemsService {
         private readonly collectionRepo: Repository<Collection>,
     ) {}
 
-    async create(dto: CreateItemDto, owner: User): Promise<Item> {
+    async create(dto: CreateItemDto, owner?: User): Promise<Item> {
         const { collection_id, name, tags } = dto;
         const collection = await this.collectionRepo.findOneBy({
             id: collection_id,
@@ -40,7 +38,7 @@ export class ItemsService {
                     collection,
                     name,
                     tags,
-                    owner
+                    owner,
                 });
                 return await this.itemRepo.save(newItem);
             }),
@@ -48,21 +46,7 @@ export class ItemsService {
         return newItems;
     }
 
-    async findAllComments(id: number): Promise<Comment[]> {
-        const item = await this.itemRepo.findOne({
-            where: {
-                id,
-            },
-            relations: {
-                comments: {
-                    owner: true,
-                },
-            },
-        });
-        return item.comments;
-    }
-
-    async findAll(query?: PaginationDto): Promise<PaginationResponse> {
+    async findAll(query: PaginationDto): Promise<PaginationResponse> {
         const total = await this.itemRepo.count();
         const result = await this.itemRepo.find({
             order: {
@@ -86,26 +70,26 @@ export class ItemsService {
             },
             where: {
                 collection: {
-                    id: collection_id
-                }
-            }
-        })
+                    id: collection_id,
+                },
+            },
+        });
         return items;
     }
 
     async findOne(id: number): Promise<Item> {
         const item = await this.itemRepo.findOne({
-            where: {id},
+            where: { id },
             relations: {
                 owner: true,
                 custom_fields: true,
                 likes: {
-                    owner: true
-                }
-            }
+                    owner: true,
+                },
+            },
         });
         if (!item) {
-            throw new NotFoundException("Item not found");
+            throw new NotFoundException('Item not found');
         }
         return item;
     }
@@ -116,39 +100,25 @@ export class ItemsService {
         return updatedItem;
     }
 
-    async updateMany(dto: CreateManyItemsDto, owner: User): Promise<Item[]> {
-        const { collection_id, items, removedItemsIds } = dto;
-
-        removedItemsIds?.map(async (removedItemId) => {
-            await this.itemRepo.delete(removedItemId);
-        });
-
-        const collection = await this.collectionRepo.findOne({
-            where: {
-                id: collection_id
-            },
-            relations: {
-                items: true
-            }
+    async updateMany(dto: CreateManyItemsDto): Promise<Item[]> {
+        const { collection_id, items } = dto;
+        const collection = await this.collectionRepo.findOneBy({
+            id: collection_id,
         });
         const newItems = await Promise.all(
             items.map(async ({ id, name, tags }) => {
                 if (id) {
-                    await this.itemRepo.update(id, {name, tags})
-                    return await this.itemRepo.findOneBy({ id })
+                    await this.itemRepo.update(id, { name, tags });
+                    return await this.itemRepo.findOneBy({ id });
                 }
                 const newItem = this.itemRepo.create({
-                    owner,
                     collection,
                     name,
                     tags,
                 });
-                const savedItem = await this.itemRepo.save(newItem);
-                collection.items.push(savedItem);
-                return savedItem;
+                return await this.itemRepo.save(newItem);
             }),
         );
-        await this.collectionRepo.save(collection);
         return newItems;
     }
 

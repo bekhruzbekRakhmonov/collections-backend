@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CustomField } from './entities/custom_field.entity';
-import { CreateCustomFieldDto, CreateManyCustomFieldsDto } from './dto/create-custom_field.dto';
-import { Item } from '../items/entities/item.entity';
-import { UpdateCustomFieldDto } from './dto/update-custom_field.dto';
-import { User } from '../users/entities/user.entity';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
+import { CreateCustomFieldDto, CreateManyCustomFieldsDto } from 'src/modules/custom_fields/dto/create-custom_field.dto';
+import { UpdateCustomFieldDto } from 'src/modules/custom_fields/dto/update-custom_field.dto';
+import { CustomField } from 'src/modules/custom_fields/entities/custom_field.entity';
+import { Item } from 'src/modules/items/entities/item.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @Injectable()
-export class CustomFieldsService {
+export class AdminCustomFieldsService {
     constructor(
         @InjectRepository(CustomField)
         private readonly customFieldRepo: Repository<CustomField>,
@@ -34,8 +34,12 @@ export class CustomFieldsService {
         return await this.customFieldRepo.save(customField);
     }
 
-    async createMany(dto: CreateManyCustomFieldsDto, owner: User): Promise<CustomField[]> {
+    async createMany(
+        dto: CreateManyCustomFieldsDto,
+        ownerId: number,
+    ): Promise<CustomField[]> {
         const { customFields, itemsIds } = dto;
+        const owner = await this.userRepo.findOneBy({ id: ownerId });
         const newCustomFields = await Promise.all(
             customFields.map(async (itemFields, index) => {
                 const newCustomFieldsForItem = await Promise.all(
@@ -50,10 +54,7 @@ export class CustomFieldsService {
                             item,
                             owner,
                         });
-                        const saved = await this.customFieldRepo.save(
-                            newCustomField,
-                        );
-                        return saved;
+                        return this.customFieldRepo.save(newCustomField);
                     }),
                 );
                 return newCustomFieldsForItem;
@@ -65,9 +66,6 @@ export class CustomFieldsService {
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
         const total = await this.customFieldRepo.count();
         const result = await this.customFieldRepo.find({
-            order: {
-                id: "DESC"
-            },
             skip: (query?.limit || 10) * ((query?.page || 1) - 1),
             take: query?.limit || 10,
         });
@@ -81,10 +79,10 @@ export class CustomFieldsService {
 
     async findOne(id: number): Promise<CustomField> {
         const customField = await this.customFieldRepo.findOne({
+            where: { id },
             relations: {
                 owner: true,
             },
-            where: { id },
         });
         if (!customField) {
             throw new NotFoundException('Custom field not found');
@@ -100,13 +98,8 @@ export class CustomFieldsService {
         return this.findOne(id);
     }
 
-    async updateMany(dto: CreateManyCustomFieldsDto, owner: User): Promise<CustomField[][]> {
-        const { customFields, itemsIds, removedCustomFieldsIds } = dto;
-
-        removedCustomFieldsIds?.map(async (removedCustomFieldId) => {
-            await this.customFieldRepo.delete(removedCustomFieldId);
-        });
-
+    async updateMany(dto: CreateManyCustomFieldsDto): Promise<CustomField[][]> {
+        const { customFields, itemsIds } = dto;
         const updatedCustomFields = await Promise.all(
             customFields.map(async (itemFields, index) => {
                 return Promise.all(
@@ -117,30 +110,26 @@ export class CustomFieldsService {
                                 type,
                                 value,
                             });
-                            const saved = await this.customFieldRepo.findOneBy({ id })
-                            return saved;
-                        } else {
-                            const item = await this.itemRepo.findOne({
-                                where: {
-                                    id: itemsIds[index],
-                                },
-                                relations: {
-                                    custom_fields: true,
-                                },
-                            });
-
-                            const newCustomField = this.customFieldRepo.create({
-                                name,
-                                type,
-                                value,
-                                item,
-                                owner,
-                            });
-
-                            return await this.customFieldRepo.save(
-                                newCustomField,
-                            );
+                            return await this.customFieldRepo.findOneBy({ id });
                         }
+
+                        const item = await this.itemRepo.findOne({
+                            where: {
+                                id: itemsIds[index],
+                            },
+                            relations: {
+                                custom_fields: true,
+                            },
+                        });
+
+                        const newCustomField = this.customFieldRepo.create({
+                            name,
+                            type,
+                            value,
+                            item,
+                        });
+
+                        return this.customFieldRepo.save(newCustomField);
                     }),
                 );
             }),

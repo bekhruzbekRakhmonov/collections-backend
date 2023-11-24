@@ -54,4 +54,10 @@ export class CreateManyCustomFieldsDto {
     @Type(() => Array)
     @IsArray()
     customFields: CreateCustomFieldDto[][];
+
+    @ApiProperty()
+    @IsOptional()
+    @Type(() => Array)
+    @IsArray()
+    removedCustomFieldsIds?: number[];
 }

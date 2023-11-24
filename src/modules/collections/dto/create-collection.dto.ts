@@ -39,4 +39,10 @@ export class CreateCollectionDto {
     @Type(() => Array)
     @IsArray()
     customFields: CreateCustomFieldDto[];
+
+    @ApiProperty()
+    @IsOptional()
+    @Type(() => Array)
+    @IsArray()
+    removedCustomFieldsIds?: number[];
 }

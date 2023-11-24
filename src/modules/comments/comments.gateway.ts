@@ -3,7 +3,6 @@ import {
     SubscribeMessage,
     MessageBody,
     WebSocketServer,
-    WsException,
     ConnectedSocket,
 } from '@nestjs/websockets';
 import { CommentsService } from './comments.service';
@@ -14,6 +13,7 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../users/entities/user.entity';
+import * as cookie from 'cookie';
 
 @ApiTags('comments')
 @WebSocketGateway()
@@ -23,22 +23,26 @@ export class CommentsGateway {
         private readonly commentsService: CommentsService,
         private readonly authService: AuthService,
     ) {}
+
     @WebSocketServer() io: Server;
     private readonly logger = new Logger(CommentsGateway.name);
+
     afterInit() {
         this.logger.log('Initialized');
     }
 
     async handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) {
         try {
-            const accessTokenCookie =
-                client.handshake.headers.cookie.split(';')[0];
-            const accessToken = accessTokenCookie.split('=')[1];
+            const parsedCookies = cookie.parse(client.handshake.headers.cookie);
+            const accessToken = parsedCookies.accessToken;
             const user = await this.authService.getUserFromAuthenticationToken(
                 accessToken,
             );
             if (!user) {
-                throw new Error('Unauthenticated user.');
+                client.emit('unauthenticated', {
+                    message: 'Unauthenticated user.',
+                });
+                return;
             }
             this.user = user;
             const { sockets } = this.io.sockets;
@@ -46,6 +50,9 @@ export class CommentsGateway {
             this.logger.log(`Client id: ${client.id} connected`);
             this.logger.debug(`Number of connected clients: ${sockets.size}`);
         } catch (error: any) {
+            client.emit('unauthenticated', {
+                message: 'Unauthenticated user.',
+            });
             this.logger.error(error.message);
         }
     }
@@ -87,7 +94,7 @@ export class CommentsGateway {
         const roomName = `item-${item_id}`;
 
         if (!this.user) {
-            this.io.to(roomName).emit('error', 'User not found');
+            this.io.to(roomName).emit('unauthenticated-retry', createCommentDto);
             return;
         }
         const newComment = await this.commentsService.create(

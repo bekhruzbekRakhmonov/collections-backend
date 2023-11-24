@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsArray, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { CreateCustomFieldDto } from "src/modules/custom_fields/dto/create-custom_field.dto";
 
 export class CreateItemDto {
@@ -48,4 +48,10 @@ export class CreateManyItemsDto {
     @Type(() => Array)
     @IsArray()
     items: CreateItemDto[];
+
+    @ApiProperty()
+    @IsOptional()
+    @Type(() => Array)
+    @IsArray()
+    removedItemsIds?: number[];
 }

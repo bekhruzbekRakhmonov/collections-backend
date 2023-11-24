@@ -95,11 +95,6 @@ export class AppService {
             .take(limit)
             .getRawMany();
 
-        console.log('Item Results:', itemResults);
-        console.log('User Results:', userResults);
-        console.log('Collection Results:', collectionResults);
-        console.log('Comment Results:', commentResults);
-
         return {
             userResults,
             collectionResults,

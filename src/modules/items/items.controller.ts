@@ -70,7 +70,7 @@ export class ItemsController {
         @Req() req: RequestWithUser,
     ) {
         const item = await this.itemsService.findOne(+id);
-        if (item.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+        if (item.owner.id !== req.user.id) {
             throw new ForbiddenException("Can't modify this item");
         }
         const updatedItem = await this.itemsService.update(+id, updateItemDto);
@@ -85,18 +85,19 @@ export class ItemsController {
         @Req() req: RequestWithUser,
     ) {
         const { items } = updateManyItemsDto;
-        
-        items.map(async (itemData) => {
-            const item = await this.itemsService.findOne(itemData.id);
-            if (item.owner.id !== req.user.id && req.user.role !== Role.Admin) {
-                throw new ForbiddenException("Can't modify this item");
-            }
-        })
+
+        // items.map(async (itemData) => {
+        //     const item = await this.itemsService.findOne(itemData.id);
+        //     if (item.owner.id !== req.user.id) {
+        //         throw new ForbiddenException("Can't modify this item");
+        //     }
+        // })
 
         const updatedItems = await this.itemsService.updateMany(
             updateManyItemsDto,
+            req.user
         );
-        return APIResponse(res).statusCreated(updatedItems);
+        return APIResponse(res).statusOK(updatedItems);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -107,7 +108,7 @@ export class ItemsController {
         @Req() req: RequestWithUser,
     ) {
         const item = await this.itemsService.findOne(+id);
-        if (item.owner.id !== req.user.id && req.user.role !== Role.Admin) {
+        if (item.owner.id !== req.user.id) {
             throw new ForbiddenException("Can't modify this item");
         }
         await this.itemsService.remove(+id);
