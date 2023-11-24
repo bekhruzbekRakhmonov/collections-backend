@@ -33,17 +33,26 @@ export class CommentsGateway {
 
     async handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) {
         try {
+            if (typeof client.handshake.headers.cookie !== 'string') {
+                client.emit('unauthenticated', {
+                    message: 'Cookie header is not a string.',
+                });
+                return;
+            }
+
             const parsedCookies = cookie.parse(client.handshake.headers.cookie);
             const accessToken = parsedCookies.accessToken;
             const user = await this.authService.getUserFromAuthenticationToken(
                 accessToken,
             );
+
             if (!user) {
                 client.emit('unauthenticated', {
                     message: 'Unauthenticated user.',
                 });
                 return;
             }
+
             this.user = user;
             const { sockets } = this.io.sockets;
 
@@ -53,7 +62,6 @@ export class CommentsGateway {
             client.emit('unauthenticated', {
                 message: 'Unauthenticated user.',
             });
-            console.error(error)
             this.logger.error(error.message);
         }
     }
@@ -95,14 +103,15 @@ export class CommentsGateway {
         const roomName = `item-${item_id}`;
 
         if (!this.user) {
-            this.io.to(roomName).emit('unauthenticated-retry', createCommentDto);
+            this.io
+                .to(roomName)
+                .emit('unauthenticated-retry', createCommentDto);
             return;
         }
         const newComment = await this.commentsService.create(
             createCommentDto,
             this.user,
         );
-
 
         this.io.to(roomName).emit('newComment', newComment);
     }
