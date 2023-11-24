@@ -16,7 +16,6 @@ import { Item } from './modules/items/entities/item.entity';
 import { User } from './modules/users/entities/user.entity';
 import { Collection } from './modules/collections/entities/collection.entity';
 import { Comment } from './modules/comments/entities/comment.entity';
-import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
     imports: [
@@ -39,7 +38,6 @@ import { AdminModule } from './modules/admin/admin.module';
         AuthModule,
         ItemsModule,
         CustomFieldsModule,
-        AdminModule,
     ],
     controllers: [AppController],
     providers: [AppService],

@@ -90,9 +90,8 @@ export class AuthController {
     }
 
     @Post('refresh')
-    async refresh(@Body() refreshTokenDto: RefreshTokenDto, @Res() res: Response) {
+    async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
         const { refreshToken } = refreshTokenDto;
-        console.log("req keldi")
         const user = await this.authService.getUserFromUnuthenticatedToken(
             refreshToken,
         );
@@ -101,6 +100,6 @@ export class AuthController {
             user.role,
         );
         console.log(accessToken)
-        return APIResponse(res).statusOK(accessToken);
+        return { accessToken };
     }
 }
