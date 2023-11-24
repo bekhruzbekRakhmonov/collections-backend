@@ -49,6 +49,7 @@ export class AuthService {
                 'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
             )}`,
         });
+        console.log("accessToken", token)
         return token;
     }
 
@@ -63,7 +64,6 @@ export class AuthService {
                 'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
             )}`,
         });
-
         return token;
     }
 
