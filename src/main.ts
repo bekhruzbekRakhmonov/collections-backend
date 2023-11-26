@@ -9,9 +9,8 @@ import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import { config } from 'dotenv';
 import * as express from 'express';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as fs from "node:fs";
-import { RedisIoAdapter } from './ws/RedisIOAdapter';
+import { RedisIoAdapter } from './ws/RedisIoAdapter';
 config();
 
 async function bootstrap() {
