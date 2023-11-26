@@ -37,6 +37,12 @@ export class CommentsController {
         return APIResponse(res).statusOK(comments);
     }
 
+    @Get('poll/:id')
+    async findCommentsByItemId(@Param('id') id: number, @Res() res: Response) {
+        const comments = await this.commentsService.findCommentsByItemId(id);
+        return APIResponse(res).statusOK(comments);
+    }
+
     @Get(':id')
     async findOne(@Param('id') id: number, @Res() res: Response) {
         const comment = await this.commentsService.findOne(id);

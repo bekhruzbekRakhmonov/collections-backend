@@ -16,7 +16,7 @@ services:
 
   backend:
     container_name: backend
-    image: 20041128/collections:0.0.3
+    image: 20041128/collections:0.0.4
     volumes:
       - ~/collections-backend/uploads:/uploads
     env_file:
@@ -25,6 +25,7 @@ services:
       - '3000' 
     depends_on:
       - postgres
+      - redis
     networks:
       - backend
     restart: unless-stopped
@@ -41,6 +42,15 @@ services:
       - '443:443'
     depends_on:
       - backend
+    networks:
+      - backend
+    restart: unless-stopped
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - '6379:6379'
     networks:
       - backend
     restart: unless-stopped

@@ -22,7 +22,7 @@ export class CommentsService {
         createCommentDto: CreateCommentDto,
         owner: User,
     ): Promise<Comment> {
-        const {item_id, content} = createCommentDto;
+        const { item_id, content } = createCommentDto;
         const item = await this.itemRepo.findOneBy({
             id: Number(item_id),
         });
@@ -49,7 +49,6 @@ export class CommentsService {
             .limit(query?.limit || 10)
             .getRawMany();
 
-
         return {
             result,
             total,
@@ -60,6 +59,19 @@ export class CommentsService {
 
     async findOne(id: number): Promise<Comment | undefined> {
         return await this.commentRepo.findOneBy({ id });
+    }
+
+    async findCommentsByItemId(id: number): Promise<Comment[]> {
+        return await this.commentRepo.find({
+            relations: {
+                item: true
+            },
+            where: {
+                item: {
+                    id
+                }
+            }
+        });
     }
 
     async update(
