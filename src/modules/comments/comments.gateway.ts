@@ -4,20 +4,18 @@ import {
     MessageBody,
     WebSocketServer,
     ConnectedSocket,
+    OnGatewayInit
 } from '@nestjs/websockets';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { ApiTags } from '@nestjs/swagger';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../users/entities/user.entity';
-import * as cookie from 'cookie';
 
-@ApiTags('comments')
 @WebSocketGateway()
-export class CommentsGateway {
+export class CommentsGateway implements OnGatewayInit {
     private user: User;
     constructor(
         private readonly commentsService: CommentsService,
@@ -32,6 +30,7 @@ export class CommentsGateway {
     }
 
     async handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) {
+        console.log(client.rooms)
         try {
             // if (typeof client.handshake.headers.cookie !== 'string') {
             //     client.emit('unauthenticated', {
@@ -42,7 +41,7 @@ export class CommentsGateway {
 
             // const parsedCookies = cookie.parse(client.handshake.headers.cookie);
             // const accessToken = parsedCookies.accessToken;
-            console.log(client.handshake.auth);
+
             const accessToken = client.handshake.auth.token;
             const user = await this.authService.getUserFromAuthenticationToken(
                 accessToken,
@@ -101,7 +100,6 @@ export class CommentsGateway {
         @MessageBody() createCommentDto: CreateCommentDto,
         @ConnectedSocket() client: Socket,
     ) {
-        console.log("creating comment")
         const { item_id } = createCommentDto;
         const roomName = `item-${item_id}`;
 

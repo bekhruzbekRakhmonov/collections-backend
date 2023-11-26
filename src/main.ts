@@ -11,6 +11,7 @@ import { config } from 'dotenv';
 import * as express from 'express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as fs from "node:fs";
+import { RedisIoAdapter } from './ws/RedisIOAdapter';
 config();
 
 async function bootstrap() {
@@ -18,7 +19,7 @@ async function bootstrap() {
         logger: ['error', 'warn', 'log'],
         cors: {
             origin: process.env.ORIGIN || '*',
-            credentials: false,
+            credentials: true,
         },
     });
 
@@ -31,7 +32,11 @@ async function bootstrap() {
         console.log(`Folder '${folderPath}' already exists.`);
     }
 
-    app.useWebSocketAdapter(new IoAdapter(app));
+    const redisIoAdapter = new RedisIoAdapter(app);
+    const redis = await redisIoAdapter.connectToRedis();
+    console.log(redis)
+
+    app.useWebSocketAdapter(redisIoAdapter);
 
     const port = process.env.PORT || 3000;
 
@@ -45,7 +50,7 @@ async function bootstrap() {
     app.use(
         '/api/uploads',
         (req, res, next) => {
-            res.header('Access-Control-Allow-Origin', '*');
+            res.header('Access-Control-Allow-Origin', process.env.ORIGIN);
             res.header(
                 'Access-Control-Allow-Methods',
                 'GET,HEAD,OPTIONS,POST,PUT',
