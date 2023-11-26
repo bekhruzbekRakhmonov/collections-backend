@@ -22,14 +22,14 @@ export class AdminCustomFieldsService {
 
     async create(dto: CreateCustomFieldDto): Promise<CustomField> {
         const { item_id, name, value, type } = dto;
-        const collection = await this.itemRepo.findOneBy({
+        const item = await this.itemRepo.findOneBy({
             id: item_id,
         });
         const customField = this.customFieldRepo.create({
             name,
             value,
             type,
-            collection,
+            item,
         });
         return await this.customFieldRepo.save(customField);
     }
@@ -66,6 +66,9 @@ export class AdminCustomFieldsService {
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
         const total = await this.customFieldRepo.count();
         const result = await this.customFieldRepo.find({
+            order: {
+                [query?.orderBy || 'id']: query?.order || 'asc',
+            },
             skip: (query?.limit || 10) * ((query?.page || 1) - 1),
             take: query?.limit || 10,
         });

@@ -58,6 +58,11 @@ export class ItemsService {
                     owner: true,
                 },
             },
+            order: {
+                comments: {
+                    created_at: 'DESC',
+                }
+            }
         });
         return item.comments;
     }
@@ -94,6 +99,7 @@ export class ItemsService {
     }
 
     async findOne(id: number): Promise<Item> {
+
         const item = await this.itemRepo.findOne({
             where: {id},
             relations: {
@@ -104,6 +110,7 @@ export class ItemsService {
                 }
             }
         });
+        console.log(item.custom_fields)
         if (!item) {
             throw new NotFoundException("Item not found");
         }

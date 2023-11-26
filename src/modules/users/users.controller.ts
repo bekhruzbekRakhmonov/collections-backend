@@ -45,48 +45,32 @@ export class UsersController {
         return APIResponse(res).statusOK(users);
     }
 
+    @Get('statistics/:id')
+    async statistics(
+        @Param('id') id: string,
+        @Res() res: Response,
+        @Req() req: RequestWithUser,
+    ) {
+        const statistics = await this.usersService.statistics(+id);
+        return APIResponse(res).statusOK(statistics);
+    }
+
     @Get(':id')
     async findOne(@Param('id') id: string, @Res() res: Response) {
         const user = await this.usersService.findOne(+id);
         return APIResponse(res).statusOK(user);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.Admin)
-    @Patch(':id')
-    async update(
-        @Param('id') id: string,
-        @Body() updateUserDto: UpdateUserDto,
-        @Res() res: Response,
-    ) {
-        const updatedUser = await this.usersService.update(+id, updateUserDto);
-        return APIResponse(res).statusOK(updatedUser);
-    }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.Admin)
-    @Delete(':id')
     async remove(@Param('id') id: string, @Res() res: Response) {
         await this.usersService.remove(+id);
         return APIResponse(res).statusNoContent();
     }
 
     @UseGuards(JwtAuthGuard)
-    @Patch('update-account')
-    async updateAccount(
-        @Param('id') id: string,
-        @Body() updateUserDto: UpdateUserDto,
-        @Res() res: Response,
-        @Req() req: RequestWithUser,
-    ) {
-        const updatedUser = await this.usersService.updateAccount(req.user.id, updateUserDto);
-        return APIResponse(res).statusOK(updatedUser);
-    }
-
-    @UseGuards(JwtAuthGuard)
     @Delete('delete-account')
     async removeAccount(
-        @Param('id') id: string,
         @Res() res: Response,
         @Req() req: RequestWithUser,
     ) {

@@ -1,10 +1,12 @@
 import {
     Column,
+    CreateDateColumn,
     Entity,
     Index,
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
 import { Like } from 'src/modules/likes/entities/like.entity';
@@ -45,4 +47,10 @@ export class Item {
 
     @OneToMany(() => CustomField, (field: CustomField) => field.item)
     custom_fields: CustomField[];
+
+    @CreateDateColumn()
+    created_at: Date;
+
+    @UpdateDateColumn()
+    updated_at: Date;
 }

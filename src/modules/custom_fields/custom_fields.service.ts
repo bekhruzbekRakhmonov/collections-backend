@@ -22,14 +22,14 @@ export class CustomFieldsService {
 
     async create(dto: CreateCustomFieldDto): Promise<CustomField> {
         const { item_id, name, value, type } = dto;
-        const collection = await this.itemRepo.findOneBy({
+        const item = await this.itemRepo.findOneBy({
             id: item_id,
         });
         const customField = this.customFieldRepo.create({
             name,
             value,
             type,
-            collection,
+            item,
         });
         return await this.customFieldRepo.save(customField);
     }

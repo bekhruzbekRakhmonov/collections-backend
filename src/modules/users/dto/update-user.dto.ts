@@ -12,7 +12,15 @@ export class UpdateUserDto {
 
     @ApiProperty()
     @IsOptional()
+    @Type(() => String)
+    @IsString()
     email?: string;
+
+    @ApiProperty()
+    @IsOptional()
+    @Type(() => String)
+    @IsString()
+    password?: string;
 
     @ApiProperty({ enum: ['admin', 'user'] })
     @IsOptional()

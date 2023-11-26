@@ -8,12 +8,22 @@ import * as bcrypt from 'bcrypt';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
 import RequestWithUser from '../auth/interfaces/request-with-user.interface';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
+import { Collection } from '../collections/entities/collection.entity';
+import { Item } from '../items/entities/item.entity';
+import { Like } from '../likes/entities/like.entity';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @InjectRepository(Collection)
+        private readonly collectionRepo: Repository<Collection>,
+        @InjectRepository(Item)
+        private readonly itemRepo: Repository<Item>,
+        @InjectRepository(Like)
+        private readonly likeRepo: Repository<Like>
+
     ) {}
 
     async create(createUserDto: CreateUserDto): Promise<User | Error> {
@@ -55,6 +65,43 @@ export class UsersService {
         };
     }
 
+    async statistics(user_id: number): Promise<any> {
+        const totalCollections = await this.collectionRepo.count({
+            relations: {
+                owner: true,
+            },
+            where: {
+                owner: {
+                    id: user_id
+                }
+            }
+        })
+
+        const items = await this.itemRepo.find({
+            relations: {
+                owner: true,
+                likes: true,
+            },
+            where: {
+                owner: {
+                    id: user_id,
+                },
+            },
+        });
+
+        const total = {
+            collections_count: totalCollections,
+            items_count: 0,
+            likes_count: 0
+        }
+
+        items.map((item) => {
+            total.items_count += 1;
+            total.likes_count += item.likes.length;
+        })
+        return total;
+    }
+
     async findOne(id: number): Promise<User> {
         return await this.userRepository.findOne({
             where: { id: id },
@@ -66,21 +113,12 @@ export class UsersService {
     }
 
     async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-        const { name, email, status, role } = updateUserDto;
+        const { name, email, status, password, role } = updateUserDto;
         const user = await this.userRepository.findOne({ where: { id } });
         user.name = name;
         user.email = email;
         user.status = status;
-        user.role = role;
-        return await this.userRepository.save(user);
-    }
-
-    async updateAccount(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-        const { name, email, status, role } = updateUserDto;
-        const user = await this.userRepository.findOne({ where: { id } });
-        user.name = name;
-        user.email = email;
-        user.status = status;
+        user.password = await this.hashPassword(password);
         return await this.userRepository.save(user);
     }
 

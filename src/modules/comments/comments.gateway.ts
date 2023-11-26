@@ -33,15 +33,17 @@ export class CommentsGateway {
 
     async handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) {
         try {
-            if (typeof client.handshake.headers.cookie !== 'string') {
-                client.emit('unauthenticated', {
-                    message: 'Cookie header is not a string.',
-                });
-                return;
-            }
+            // if (typeof client.handshake.headers.cookie !== 'string') {
+            //     client.emit('unauthenticated', {
+            //         message: 'Cookie header is not a string.',
+            //     });
+            //     return;
+            // }
 
-            const parsedCookies = cookie.parse(client.handshake.headers.cookie);
-            const accessToken = parsedCookies.accessToken;
+            // const parsedCookies = cookie.parse(client.handshake.headers.cookie);
+            // const accessToken = parsedCookies.accessToken;
+            console.log(client.handshake.auth);
+            const accessToken = client.handshake.auth.token;
             const user = await this.authService.getUserFromAuthenticationToken(
                 accessToken,
             );
@@ -99,6 +101,7 @@ export class CommentsGateway {
         @MessageBody() createCommentDto: CreateCommentDto,
         @ConnectedSocket() client: Socket,
     ) {
+        console.log("creating comment")
         const { item_id } = createCommentDto;
         const roomName = `item-${item_id}`;
 
