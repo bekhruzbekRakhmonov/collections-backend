@@ -5,16 +5,16 @@ import { CreateCustomFieldDto } from "src/modules/custom_fields/dto/create-custo
 
 export class CreateItemDto {
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @Type(() => Number)
     @IsNumber()
     id?: number;
 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     @Type(() => Number)
     @IsNumber()
-    collection_id: number;
+    collection_id?: number;
 
     @ApiProperty()
     @IsNotEmpty()

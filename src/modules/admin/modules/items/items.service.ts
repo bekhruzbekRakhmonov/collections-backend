@@ -49,6 +49,9 @@ export class AdminItemsService {
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
         const total = await this.itemRepo.count();
         const result = await this.itemRepo.find({
+            relations: {
+                collection: true,
+            },
             order: {
                 [query?.orderBy || 'id']: query?.order || 'asc',
             },

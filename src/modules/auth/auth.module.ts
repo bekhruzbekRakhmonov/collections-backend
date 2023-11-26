@@ -13,16 +13,17 @@ import { Collection } from '../collections/entities/collection.entity';
 import { Item } from '../items/entities/item.entity';
 import { Comment } from '../comments/entities/comment.entity';
 import { CustomField } from '../custom_fields/entities/custom_field.entity';
+import { Like } from '../likes/entities/like.entity';
 
 @Module({
     imports: [
-        PassportModule.register({ defaultStrategy: 'jwt' }), // Ensure 'jwt' is set as the default strategy
+        PassportModule.register({ defaultStrategy: 'jwt' }), 
         JwtModule.register({
             secret: process.env.JWT_SECRET,
             signOptions: { expiresIn: '1h' },
         }),
         UsersModule,
-        TypeOrmModule.forFeature([User, Collection, Item, Comment, CustomField]),
+        TypeOrmModule.forFeature([User, Collection, Item, Comment, CustomField, Like]),
     ],
     controllers: [AuthController],
     exports: [PassportModule, JwtModule],

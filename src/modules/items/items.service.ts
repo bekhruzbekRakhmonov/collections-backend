@@ -99,6 +99,7 @@ export class ItemsService {
     }
 
     async findOne(id: number): Promise<Item> {
+
         const item = await this.itemRepo.findOne({
             where: {id},
             relations: {
@@ -109,6 +110,7 @@ export class ItemsService {
                 }
             }
         });
+        console.log(item.custom_fields)
         if (!item) {
             throw new NotFoundException("Item not found");
         }

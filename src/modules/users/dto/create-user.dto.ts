@@ -29,4 +29,9 @@ export class CreateUserDto {
     @IsOptional()
     @IsIn(['admin', 'user'])
     role?: 'admin' | 'user';
+
+    @ApiProperty({ enum: ['active', 'blocked'] })
+    @IsOptional()
+    @IsIn(['active', 'blocked'])
+    status?: 'active' | 'blocked';
 }

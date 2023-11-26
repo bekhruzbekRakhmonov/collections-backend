@@ -17,7 +17,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         logger: ['error', 'warn', 'log'],
         cors: {
-            origin: process.env.ORIGIN || '*',
+            origin: '*' || '*',
             credentials: false,
         },
     });

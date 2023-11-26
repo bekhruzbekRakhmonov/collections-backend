@@ -19,10 +19,24 @@ export class LikesService {
     async likeOrUnlike(dto: CreateLikeDto, user: User): Promise<Item> {
         const { item_id } = dto;
         const item = await this.itemRepo.findOneBy({ id: item_id });
+
+        const like = await this.likeRepo
+            .createQueryBuilder('like')
+            .leftJoin('like.owner', 'owner', 'owner.id = like.ownerId')
+            .leftJoin('like.item', 'item', 'item.id = like.itemId')
+            .where('item.id = :item_id', { item_id })
+            .andWhere('owner.id = :user_id', { user_id: user.id })
+            .select([
+                'like.id as id',
+                'owner.id as ownerId',
+                'item.id as itemId',
+            ])
+            .getRawOne();
+
+
         if (!item) {
             throw new NotFoundException('Item not found');
         }
-        const like = await this.likeRepo.findOneBy({ owner: {id: user.id}, item });
 
         if (!like) {
             const newLike = this.likeRepo.create({ item, owner: user });
@@ -51,8 +65,8 @@ export class LikesService {
     async findAll(): Promise<Like[]> {
         const likes = await this.likeRepo.find({
             order: {
-                id: 'DESC'
-            }
+                id: 'DESC',
+            },
         });
         return likes;
     }

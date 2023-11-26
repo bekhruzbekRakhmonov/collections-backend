@@ -55,9 +55,12 @@ export class AppService {
                 `to_tsvector('simple', name || ' ' || tags) @@ to_tsquery('simple', :query)`,
                 { query: `${formattedQuery}:*` },
             )
+            .select(`'/show-item/' || '' || id as link`)
+            .addSelect('name')
+            .addSelect('tags')
             .skip((page - 1) * limit)
             .take(limit)
-            .getMany();
+            .getRawMany();
 
         const userResults = await this.userRepo
             .createQueryBuilder()
@@ -65,9 +68,12 @@ export class AppService {
                 `to_tsvector('simple', name || ' ' || email) @@ to_tsquery('simple', :query)`,
                 { query: `${formattedQuery}:*` },
             )
+            .select(`'/users/' || '' || id as link`)
+            .addSelect('name')
+            .addSelect('email')
             .skip((page - 1) * limit)
             .take(limit)
-            .getMany();
+            .getRawMany();
 
         const collectionResults = await this.collectionRepo
             .createQueryBuilder()
