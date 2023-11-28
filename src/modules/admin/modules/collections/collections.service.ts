@@ -9,7 +9,7 @@ import { UpdateCollectionDto } from 'src/modules/collections/dto/update-collecti
 import { CustomField } from 'src/modules/custom_fields/entities/custom_field.entity';
 import { Item } from 'src/modules/items/entities/item.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository, DeleteResult, Like } from 'typeorm';
 import { Collection } from 'src/modules/collections/entities/collection.entity';
 
 @Injectable()
@@ -63,8 +63,21 @@ export class AdminCollectionsService {
     }
 
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
-        const total = await this.collectionRepo.count();
+        const total = await this.collectionRepo.count({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? Number(query.q) || null
+                        : Like(`%${query.q}%`),
+            },
+        });
         const result = await this.collectionRepo.find({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? Number(query.q) || null
+                        : Like(`%${query.q}%`),
+            },
             relations: {
                 owner: true,
             },

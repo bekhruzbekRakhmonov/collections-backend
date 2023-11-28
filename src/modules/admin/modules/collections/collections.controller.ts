@@ -45,7 +45,9 @@ export class AdminCollectionsController {
 
     @Get()
     async findAll(@Res() res: Response, @Query() query: PaginationDto) {
-        const allCollections = await this.adminCollectionsService.findAll(query);
+        const allCollections = await this.adminCollectionsService.findAll(
+            query,
+        );
         return APIResponse(res).statusOK(allCollections);
     }
 

@@ -58,4 +58,10 @@ export class PaginationDto {
     @Type(() => String)
     @Transform(({ value }) => (value === 'true' ? true : false))
     detail?: boolean;
+
+    @ApiPropertyOptional({ description: 'Order by' })
+    @IsOptional()
+    @Type(() => String)
+    @IsString()
+    columnName?: string;
 }

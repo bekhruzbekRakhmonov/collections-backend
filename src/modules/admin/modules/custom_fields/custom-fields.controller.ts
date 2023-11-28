@@ -45,7 +45,9 @@ export class AdminCustomFieldsController {
 
     @Get()
     async findAll(@Res() res: Response, @Query() query: PaginationDto) {
-        const allCustomFields = await this.adminCustomFieldsService.findAll(query);
+        const allCustomFields = await this.adminCustomFieldsService.findAll(
+            query,
+        );
         return APIResponse(res).statusOK(allCustomFields);
     }
 

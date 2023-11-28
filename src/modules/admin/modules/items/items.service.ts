@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
 import { Collection } from 'src/modules/collections/entities/collection.entity';
@@ -47,8 +47,19 @@ export class AdminItemsService {
     }
 
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
-        const total = await this.itemRepo.count();
+        const total = await this.itemRepo.count({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id' ? Number(query.q) || null : Like(`%${query.q}%`),
+            },
+        });
         const result = await this.itemRepo.find({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? Number(query.q) || null
+                        : Like(`%${query.q}%`),
+            },
             relations: {
                 collection: true,
             },
@@ -66,6 +77,7 @@ export class AdminItemsService {
             page: Number(query?.page || 1),
         };
     }
+
     async findItemsByCollectionId(collection_id: number) {
         const items = await this.itemRepo.find({
             relations: {

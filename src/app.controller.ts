@@ -1,8 +1,8 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Response, query } from 'express';
-import { PaginationDto } from './common/pagination/pagination.dto';
 import { APIResponse } from './common/http/response/response.api';
+import { PaginationDto } from './common/pagination/pagination.dto';
 
 @Controller()
 export class AppController {

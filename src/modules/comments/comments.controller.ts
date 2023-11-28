@@ -14,7 +14,6 @@ import {
     ForbiddenException,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { Comment } from './entities/comment.entity';
 import { Response } from 'express';
 import { APIResponse } from 'src/common/http/response/response.api';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
