@@ -18,6 +18,6 @@ jobs:
         run: |
           docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Docker image build
-        run: docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/collections:0.0.5
+        run: docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/collections:0.0.6
       - name: Push to Docker Hub
-        run: docker push ${{secrets.DOCKER_USER}}/collections:0.0.5
+        run: docker push ${{secrets.DOCKER_USER}}/collections:0.0.6
