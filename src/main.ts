@@ -33,7 +33,6 @@ async function bootstrap() {
 
     const redisIoAdapter = new RedisIoAdapter(app);
     const redis = await redisIoAdapter.connectToRedis();
-    console.log(redis)
 
     app.useWebSocketAdapter(redisIoAdapter);
 
