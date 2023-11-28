@@ -119,28 +119,46 @@ export class CollectionsService {
             },
             relations: {
                 owner: true,
-                items: {
-                    custom_fields: true,
-                    likes: {
-                        owner: true
-                    },
-                },
-                custom_fields: true,
-            },
-            order: {
-                items: {
-                    custom_fields: {
-                        id: "ASC"
-                    }
-                },
-                custom_fields: {
-                    id: "ASC",
-                }
             }
         });
+
+
         if (!collection) {
             throw new NotFoundException('Collection not found');
         }
+
+        const custom_fields = await this.customFieldRepo.find({
+            where: {
+                collection: {
+                    id,
+                },
+            },
+            order: {
+                id: 'ASC'
+            }
+        });
+
+        const items = await this.itemRepo.find({
+            relations: {
+                custom_fields: true,
+                likes: {
+                    owner: true,
+                },
+            },
+            where: {
+                collection: {
+                    id,
+                },
+            },
+            order: {
+                custom_fields: {
+                    id: "ASC"
+                }
+            },
+        });
+
+        collection.custom_fields = custom_fields;
+        collection.items = items;
 
         return collection;
     }
