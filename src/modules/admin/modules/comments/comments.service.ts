@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { Comment } from 'src/modules/comments/entities/comment.entity';
@@ -34,7 +34,14 @@ export class AdminCommentsService {
     }
 
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
-        const total = await this.commentRepo.count();
+        const total = await this.commentRepo.count({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? query.q || null
+                        : Like(`%${query.q}%`),
+            },
+        });
         const result = await this.commentRepo
             .createQueryBuilder('comment')
             .leftJoin('comment.owner', 'owner', 'owner.id = comment.ownerId')
@@ -44,6 +51,12 @@ export class AdminCommentsService {
             .addSelect('comment.content', 'content')
             .addSelect('comment.created_at', 'created_at')
             .addSelect('comment.updated_at', 'updated_at')
+            .where(`comment.${query.columnName} LIKE :search`, {
+                search:
+                    query.columnName === 'id'
+                        ? query.q || null
+                        : `%${query.q}%`,
+            })
             .orderBy(
                 `comment.${query?.orderBy || 'id'}`,
                 (query?.order?.toUpperCase() as any) || 'ASC',

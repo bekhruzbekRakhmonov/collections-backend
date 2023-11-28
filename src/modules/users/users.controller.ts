@@ -17,12 +17,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from 'express';
 import { APIResponse } from 'src/common/http/response/response.api';
 import { ApiTags } from '@nestjs/swagger';
-import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import JwtAuthGuard from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles/roles.guard';
-import { Roles } from '../auth/roles/roles.decorator';
-import { Role } from '../auth/roles/role.enum';
 import RequestWithUser from '../auth/interfaces/request-with-user.interface';
+import { PaginationDto } from 'src/common/pagination/pagination.dto';
 
 @ApiTags('users')
 @Controller('users')

@@ -9,7 +9,6 @@ import JwtAuthGuard from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles/roles.guard';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import RequestWithUser from '../auth/interfaces/request-with-user.interface';
-import { Role } from '../auth/roles/role.enum';
 
 @ApiTags('items')
 @Controller('items')

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CommentsGateway } from './comments.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,12 +11,21 @@ import { User } from '../users/entities/user.entity';
 import { Item } from '../items/entities/item.entity';
 import { CommentsController } from './comments.controller';
 import { Collection } from '../collections/entities/collection.entity';
-import { UsersModule } from '../users/users.module';
 import { Like } from '../likes/entities/like.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Comment, User, Item, Like, Collection]), AuthModule],
-    providers: [CommentsGateway, CommentsService, AuthService, UsersService, ConfigService],
-    controllers: [CommentsController]
+    imports: [
+        TypeOrmModule.forFeature([Comment, User, Item, Like, Collection]),
+        AuthModule,
+    ],
+    providers: [
+        CommentsGateway,
+        CommentsService,
+        AuthService,
+        UsersService,
+        ConfigService,
+    ],
+    controllers: [CommentsController],
 })
-export class CommentsModule {}
+export class CommentsModule {
+}

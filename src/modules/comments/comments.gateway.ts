@@ -13,6 +13,7 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../users/entities/user.entity';
+import * as cookie from 'cookie';
 
 @WebSocketGateway()
 export class CommentsGateway implements OnGatewayInit {
@@ -29,52 +30,53 @@ export class CommentsGateway implements OnGatewayInit {
         this.logger.log('Initialized');
     }
 
-    async handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) {
-        console.log(client.rooms)
+    async handleConnection(@ConnectedSocket() client: Socket & { user: User }, ...args: any[]) {
+        if (typeof client.handshake.headers.cookie !== 'string') {
+            client.emit('unauthenticated', {
+                message: 'Cookie header is not a string.',
+            });
+            return;
+        }
+
+        const parsedCookies = cookie.parse(client.handshake.headers.cookie);
+        const token = parsedCookies.accessToken;
+
+        if (!token) {
+            client.emit('unauthenticated', {
+                message: 'Authentication token not provided.',
+            });
+            return client.disconnect(true);
+        }
+
         try {
-            // if (typeof client.handshake.headers.cookie !== 'string') {
-            //     client.emit('unauthenticated', {
-            //         message: 'Cookie header is not a string.',
-            //     });
-            //     return;
-            // }
-
-            // const parsedCookies = cookie.parse(client.handshake.headers.cookie);
-            // const accessToken = parsedCookies.accessToken;
-
-            const accessToken = client.handshake.auth.token;
             const user = await this.authService.getUserFromAuthenticationToken(
-                accessToken,
+                token,
             );
 
             if (!user) {
                 client.emit('unauthenticated', {
-                    message: 'Unauthenticated user.',
+                    message: 'Invalid authentication token.',
                 });
-                return;
+                return client.disconnect(true);
             }
 
-            this.user = user;
-            const { sockets } = this.io.sockets;
-
-            this.logger.log(`Client id: ${client.id} connected`);
-            this.logger.debug(`Number of connected clients: ${sockets.size}`);
-        } catch (error: any) {
+            client.user = user;
+        } catch (error) {
             client.emit('unauthenticated', {
-                message: 'Unauthenticated user.',
+                message: 'Error during authentication.',
             });
-            this.logger.error(error.message);
+            return client.disconnect(true);
         }
     }
 
-    async handleDisconnect(@ConnectedSocket() client: Socket) {
+    async handleDisconnect(@ConnectedSocket() client: Socket & { user: User }) {
         this.logger.log(`Client id:${client.id} disconnected`);
     }
 
     @SubscribeMessage('joinRoom')
     async joinRoom(
         @MessageBody() itemId: number,
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() client: Socket & { user: User },
     ) {
         const roomName = `item-${itemId}`;
 
@@ -86,7 +88,7 @@ export class CommentsGateway implements OnGatewayInit {
     @SubscribeMessage('leaveRoom')
     async leaveRoom(
         @MessageBody() itemId: number,
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() client: Socket & { user: User },
     ) {
         const roomName = `item-${itemId}`;
 
@@ -98,20 +100,14 @@ export class CommentsGateway implements OnGatewayInit {
     @SubscribeMessage('createComment')
     async create(
         @MessageBody() createCommentDto: CreateCommentDto,
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() client: Socket & { user: User },
     ) {
         const { item_id } = createCommentDto;
         const roomName = `item-${item_id}`;
 
-        if (!this.user) {
-            this.io
-                .to(roomName)
-                .emit('unauthenticated-retry', createCommentDto);
-            return;
-        }
         const newComment = await this.commentsService.create(
             createCommentDto,
-            this.user,
+            client.user,
         );
 
         this.io.to(roomName).emit('newComment', newComment);

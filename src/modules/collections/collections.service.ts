@@ -7,14 +7,13 @@ import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Collection } from './entities/collection.entity';
 import { DeleteResult, Repository } from 'typeorm';
-import { Item } from '../items/entities/item.entity';
-import { CustomField } from '../custom_fields/entities/custom_field.entity';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import * as fs from 'node:fs';
 import { User } from '../users/entities/user.entity';
-import { CreateCustomFieldDto } from '../custom_fields/dto/create-custom_field.dto';
 import { isBase64Image } from 'src/common/utils/base64ImageChecker';
+import { Item } from '../items/entities/item.entity';
+import { CustomField } from '../custom_fields/entities/custom_field.entity';
 
 @Injectable()
 export class CollectionsService {

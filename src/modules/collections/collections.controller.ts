@@ -21,9 +21,7 @@ import { Response } from 'express';
 import JwtAuthGuard from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles/roles.guard';
 import RequestWithUser from '../auth/interfaces/request-with-user.interface';
-import { Role } from '../auth/roles/role.enum';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
-import { OwnershipGuard } from '../auth/guards/ownership.guard';
 
 @ApiTags('collections')
 @Controller('collections')

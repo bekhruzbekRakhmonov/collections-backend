@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { Like, Repository, UpdateResult } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
@@ -37,8 +37,21 @@ export class AdminUsersService {
     }
 
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
-        const total = await this.userRepository.count();
+        const total = await this.userRepository.count({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? Number(query.q) || null
+                        : Like(`%${query.q}%`),
+            },
+        });
         const result = await this.userRepository.find({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? Number(query.q) || null
+                        : Like(`%${query.q}%`),
+            },
             order: {
                 [query?.orderBy || 'id']: query?.order || 'asc',
             },

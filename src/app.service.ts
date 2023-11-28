@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getManager } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Item } from './modules/items/entities/item.entity';
-import { PaginationDto } from './common/pagination/pagination.dto';
 import { User } from './modules/users/entities/user.entity';
 import { Collection } from './modules/collections/entities/collection.entity';
 import { Comment } from './modules/comments/entities/comment.entity';
+import { PaginationDto } from './common/pagination/pagination.dto';
 
 @Injectable()
 export class AppService {
@@ -81,6 +81,10 @@ export class AppService {
                 `to_tsvector('simple', name || ' ' || description || ' ' || topic) @@ to_tsquery('simple', :query)`,
                 { query: `${formattedQuery}:*` },
             )
+            .select(`'/show-collection/' || '' || id as link`)
+            .addSelect('name')
+            .addSelect('description')
+            .addSelect('topic')
             .skip((page - 1) * limit)
             .take(limit)
             .getMany();
@@ -88,9 +92,14 @@ export class AppService {
         const commentResults = await this.commentRepo
             .createQueryBuilder('comment')
             .leftJoinAndSelect(Item, 'item', 'item.id = comment.itemId')
-            .leftJoinAndSelect(Collection, 'collection', 'collection.id = item.collectionId')
-            .select('comment.id', 'id')
-            .addSelect('comment.content', 'content')
+            .leftJoinAndSelect(
+                Collection,
+                'collection',
+                'collection.id = item.collectionId',
+            )
+            .select(`'/show-item/' || '' || item.id as link`)
+            .addSelect('comment.id', 'id')
+            .addSelect('comment.content', 'name')
             .addSelect('item.id', 'item_id')
             .addSelect('collection.id', 'collection_id')
             .where(

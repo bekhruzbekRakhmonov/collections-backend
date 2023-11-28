@@ -6,11 +6,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
-import RequestWithUser from '../auth/interfaces/request-with-user.interface';
-import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { Collection } from '../collections/entities/collection.entity';
 import { Item } from '../items/entities/item.entity';
 import { Like } from '../likes/entities/like.entity';
+import { PaginationDto } from 'src/common/pagination/pagination.dto';
 
 @Injectable()
 export class UsersService {

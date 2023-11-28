@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/pagination/pagination.dto';
 import { PaginationResponse } from 'src/common/pagination/pagination-response.dto';
 import { CreateCustomFieldDto, CreateManyCustomFieldsDto } from 'src/modules/custom_fields/dto/create-custom_field.dto';
@@ -64,8 +64,21 @@ export class AdminCustomFieldsService {
     }
 
     async findAll(query: PaginationDto): Promise<PaginationResponse> {
-        const total = await this.customFieldRepo.count();
+        const total = await this.customFieldRepo.count({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? Number(query.q) || null
+                        : Like(`%${query.q}%`),
+            },
+        });
         const result = await this.customFieldRepo.find({
+            where: {
+                [query.columnName]:
+                    query.columnName === 'id'
+                        ? Number(query.q) || null
+                        : Like(`%${query.q}%`),
+            },
             order: {
                 [query?.orderBy || 'id']: query?.order || 'asc',
             },
