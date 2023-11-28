@@ -31,17 +31,18 @@ export class CommentsGateway implements OnGatewayInit {
     }
 
     async handleConnection(@ConnectedSocket() client: Socket & { user: User }, ...args: any[]) {
-        if (typeof client.handshake.headers.cookie !== 'string') {
-            client.emit('unauthenticated', {
-                message: 'Cookie header is not a string.',
-            });
-            return;
-        }
+        // if (typeof client.handshake.headers.cookie !== 'string') {
+        //     client.emit('unauthenticated', {
+        //         message: 'Cookie header is not a string.',
+        //     });
+        //     return;
+        // }
 
-        const parsedCookies = cookie.parse(client.handshake.headers.cookie);
-        const token = parsedCookies.accessToken;
+        // const parsedCookies = cookie.parse(client.handshake.headers.cookie);
+        // const token = parsedCookies.accessToken;
+        const accessToken = client.handshake.auth.token;
 
-        if (!token) {
+        if (!accessToken) {
             client.emit('unauthenticated', {
                 message: 'Authentication token not provided.',
             });
@@ -50,22 +51,26 @@ export class CommentsGateway implements OnGatewayInit {
 
         try {
             const user = await this.authService.getUserFromAuthenticationToken(
-                token,
+                accessToken,
             );
 
             if (!user) {
                 client.emit('unauthenticated', {
-                    message: 'Invalid authentication token.',
+                    message: 'Unauthenticated user.',
                 });
-                return client.disconnect(true);
+                return;
             }
 
             client.user = user;
-        } catch (error) {
+            const { sockets } = this.io.sockets;
+
+            this.logger.log(`Client id: ${client.id} connected`);
+            this.logger.debug(`Number of connected clients: ${sockets.size}`);
+        } catch (error: any) {
             client.emit('unauthenticated', {
-                message: 'Error during authentication.',
+                message: 'Unauthenticated user.',
             });
-            return client.disconnect(true);
+            this.logger.error(error.message);
         }
     }
 
