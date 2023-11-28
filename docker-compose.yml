@@ -35,21 +35,21 @@ services:
       timeout: 10s
       retries: 3
 
-  # caddy:
-  #   container_name: caddy
-  #   image: caddy:latest
-  #   volumes:
-  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
-  #     - caddy_data:/data
-  #     - caddy_config:/config
-  #   ports:
-  #     - '80:80'
-  #     - '443:443'
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - backend
-  #   restart: unless-stopped
+  caddy:
+    container_name: caddy
+    image: caddy:latest
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - backend
+    networks:
+      - backend
+    restart: unless-stopped
 
   redis:
     container_name: redis
@@ -66,5 +66,5 @@ networks:
 
 volumes:
   postgres_data:
-  # caddy_data:
-  # caddy_config:
+  caddy_data:
+  caddy_config:
