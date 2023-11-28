@@ -13,6 +13,8 @@ import * as fs from "node:fs";
 import { RedisIoAdapter } from './ws/RedisIoAdapter';
 config();
 
+console.log(process.env.REDIS_HOST, process.env.REDIS_PORT);
+
 async function bootstrap() {
     const app = await NestFactory.create(AppModule, {
         logger: ['error', 'warn', 'log'],
