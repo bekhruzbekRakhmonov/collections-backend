@@ -8,6 +8,8 @@ config();
 const REDIS_HOST = process.env.REDIS_HOST
 const REDIS_PORT = process.env.REDIS_PORT;
 
+console.log(REDIS_HOST, REDIS_PORT)
+
 export class RedisIoAdapter extends IoAdapter {
     private adapterConstructor: ReturnType<typeof createAdapter>;
 
