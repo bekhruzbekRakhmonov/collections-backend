@@ -132,6 +132,9 @@ export class CollectionsService {
                     custom_fields: {
                         id: "ASC"
                     }
+                },
+                custom_fields: {
+                    id: "ASC",
                 }
             }
         });
