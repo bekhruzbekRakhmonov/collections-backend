@@ -5,14 +5,17 @@ import { createClient } from 'redis';
 import { config } from 'dotenv';
 config();
 
+const REDIS_HOST = process.env.REDIS_HOST
+const REDIS_PORT = process.env.REDIS_PORT;
+
 export class RedisIoAdapter extends IoAdapter {
     private adapterConstructor: ReturnType<typeof createAdapter>;
 
     async connectToRedis(): Promise<void> {
         const pubClient = createClient({
             socket: {
-                host: 'redis',
-                port: 6379,
+                host: REDIS_HOST,
+                port: Number(REDIS_PORT),
             },
         });
         const subClient = pubClient.duplicate();
